@@ -610,7 +610,9 @@ class PlateManagerWidget(QWidget):
         # Let validation failures bubble up as status messages
         if invalid_plates:
             invalid_names = [p['name'] for p in invalid_plates]
-            self.status_message.emit(f"Cannot compile invalid plates: {', '.join(invalid_names)}")
+            error_msg = f"Cannot compile invalid plates: {', '.join(invalid_names)}"
+            self.status_message.emit(error_msg)
+            self.service_adapter.show_error_dialog(error_msg)
             return
 
         # Start async compilation

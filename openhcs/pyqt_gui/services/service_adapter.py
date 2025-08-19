@@ -9,8 +9,8 @@ import logging
 from typing import Any, Optional
 from pathlib import Path
 
-from PyQt6.QtWidgets import QMessageBox, QFileDialog, QApplication, QWidget
-from PyQt6.QtCore import QProcess, QThread, pyqtSignal
+from PyQt6.QtWidgets import QMessageBox, QFileDialog, QApplication, QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PyQt6.QtCore import QProcess, QThread, pyqtSignal, Qt, QTimer
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtCore import QUrl
 
@@ -129,17 +129,46 @@ class PyQtServiceAdapter:
     def show_error_dialog(self, error_message: str, title: str = "Error") -> None:
         """
         Show error dialog with error icon.
-        
+
         Args:
             error_message: Error message to display
             title: Dialog title
         """
-        msg = QMessageBox(self.main_window)
-        msg.setWindowTitle(title)
-        msg.setText(error_message)
-        msg.setIcon(QMessageBox.Icon.Critical)
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        msg.exec()
+        # Create custom dialog instead of QMessageBox
+        dialog = QDialog(self.main_window)
+        dialog.setWindowTitle(title)
+        dialog.setModal(True)
+        dialog.setFixedSize(400, 150)
+
+        # Set window flags to ensure close button works
+        dialog.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.WindowCloseButtonHint)
+
+        # Create layout
+        layout = QVBoxLayout(dialog)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Error message label
+        message_label = QLabel(error_message)
+        message_label.setWordWrap(True)
+        message_label.setStyleSheet("color: #ff6b6b; font-size: 12px;")
+        layout.addWidget(message_label)
+
+        # Button layout
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+
+        # OK button
+        ok_button = QPushButton("OK")
+        ok_button.setFixedSize(80, 30)
+        ok_button.clicked.connect(dialog.accept)
+        ok_button.setDefault(True)
+        button_layout.addWidget(ok_button)
+
+        layout.addLayout(button_layout)
+
+        # Show dialog
+        dialog.exec()
     
     def show_info_dialog(self, info_message: str, title: str = "Information") -> None:
         """
